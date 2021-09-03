@@ -13,6 +13,10 @@
 #include <ImGui/ImGuiInternal.h>
 #include <stdio.h>
 
+#include <ImGui/Widget/ImGuiTextEditor.h>
+#include <fstream>
+#include <streambuf>
+
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #  include <GLES2/gl2.h>
 // About Desktop OpenGL function loaders:
@@ -156,7 +160,8 @@ void SetDockSpace()
 
   // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
   // because it would be confusing to have two docking targets within each others.
-  ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+  //   ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+  ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
   if (opt_fullscreen)
   {
     // const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -185,12 +190,12 @@ void SetDockSpace()
   // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
   // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
   if (!opt_padding) ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-  ImGui::Begin("DockSpace Demo1", nullptr, window_flags);
+  ImGui::Begin("DockSpace", nullptr, window_flags);
   if (!opt_padding) ImGui::PopStyleVar();
 
   if (opt_fullscreen) ImGui::PopStyleVar(2);
 
-  ImGuiID DockspaceID = ImGui::GetID("MyDockspace1");
+  ImGuiID DockspaceID = ImGui::GetID("Dockspace");
 
   if (!ImGui::DockBuilderGetNode(DockspaceID))
   {
@@ -199,11 +204,11 @@ void SetDockSpace()
     ImGui::DockBuilderSetNodeSize(DockspaceID, ImGui::GetIO().DisplaySize * ImGui::GetIO().DisplayFramebufferScale);
 
     ImGuiID dock_main_id = DockspaceID;
-    ImGuiID DockBottom   = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.3f, nullptr, &dock_main_id);
-    ImGuiID DockLeft     = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.2f, nullptr, &dock_main_id);
-    ImGuiID DockRight    = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
+    // ImGuiID DockBottom   = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.3f, nullptr, &dock_main_id);
+    ImGuiID DockLeft  = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.5f, nullptr, &dock_main_id);
+    ImGuiID DockRight = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
 
-    ImGuiID DockLeftChild  = ImGui::DockBuilderSplitNode(DockLeft, ImGuiDir_Down, 0.875f, nullptr, &DockLeft);
+    // ImGuiID DockLeftChild = ImGui::DockBuilderSplitNode(DockLeft, ImGuiDir_Down, 0.875f, nullptr, &DockLeft);
     // ImGuiID DockRightChild = ImGui::DockBuilderSplitNode(DockRight, ImGuiDir_Down, 0.875f, nullptr, &DockRight);
     // ImGuiID DockingLeftDownChild
     //     = ImGui::DockBuilderSplitNode(DockLeftChild, ImGuiDir_Down, 0.06f, nullptr, &DockLeftChild);
@@ -211,23 +216,21 @@ void SetDockSpace()
     //     = ImGui::DockBuilderSplitNode(DockRightChild, ImGuiDir_Down, 0.06f, nullptr, &DockRightChild);
 
     // ImGuiID DockBottomChild        = ImGui::DockBuilderSplitNode(DockBottom, ImGuiDir_Down, 0.2f, nullptr,
-    // &DockBottom); 
-    ImGuiID DockingBottomLeftChild = ImGui::DockBuilderSplitNode(DockLeft, ImGuiDir_Down, 0.4f,
-     nullptr, &DockLeft); 
+    // &DockBottom);
+    // ImGuiID DockingBottomLeftChild = ImGui::DockBuilderSplitNode(DockLeft, ImGuiDir_Down, 0.4f, nullptr, &DockLeft);
     //  ImGuiID DockingBottomRightChild = ImGui::DockBuilderSplitNode(DockRight, ImGuiDir_Down,
     // 0.4f, nullptr, &DockRight);
 
-    ImGuiID DockMiddle       = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.8f, nullptr,
-     &dock_main_id); 
-    ImGuiID DockBottomMiddle = ImGui::DockBuilderSplitNode(DockMiddle, ImGuiDir_Down, 0.3f, nullptr,
-    &DockMiddle);
+    // ImGuiID DockMiddle       = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.8f, nullptr,
+    // &dock_main_id); ImGuiID DockBottomMiddle = ImGui::DockBuilderSplitNode(DockMiddle, ImGuiDir_Down, 0.3f, nullptr,
+    // &DockMiddle);
 
     // ImGui::DockBuilderDockWindow("###scene", DockMiddle);
-    // ImGui::DockBuilderDockWindow("DockTestDemo", DockRight);
+    ImGui::DockBuilderDockWindow("AST View", DockRight);
     // ImGui::DockBuilderDockWindow("Hello, 中文测试world!", DockBottomMiddle);
     // ImGui::DockBuilderDockWindow("Hello, 中文测试world!", DockingBottomLeftChild);
-    ImGui::DockBuilderDockWindow("Another Window", DockingBottomLeftChild);
-    ImGui::DockBuilderDockWindow("Dear ImGui Demo", DockLeft);
+    // ImGui::DockBuilderDockWindow("AST View", DockingBottomLeftChild);
+    ImGui::DockBuilderDockWindow("Text Editor", DockLeft);
     // ImGui::DockBuilderDockWindow("GraphicsInfo", DockLeft);
     // ImGui::DockBuilderDockWindow("ApplicationInfo", DockLeft);
     // ImGui::DockBuilderDockWindow("###hierarchy", DockLeft);
@@ -248,62 +251,64 @@ void SetDockSpace()
     // ShowDockingDisabledMessage();
   }
 
-  if (ImGui::BeginMenuBar())
-  {
-    if (ImGui::BeginMenu("Options"))
-    {
-      // Disabling fullscreen would allow the window to be moved to the front of other windows,
-      // which we can't undo at the moment without finer window depth/z control.
-      ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen);
-      ImGui::MenuItem("Padding", NULL, &opt_padding);
-      ImGui::Separator();
+  //   if (ImGui::BeginMenuBar())
+  //   {
+  //     if (ImGui::BeginMenu("Options"))
+  //     {
+  //       // Disabling fullscreen would allow the window to be moved to the front of other windows,
+  //       // which we can't undo at the moment without finer window depth/z control.
+  //       ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen);
+  //       ImGui::MenuItem("Padding", NULL, &opt_padding);
+  //       ImGui::Separator();
 
-      if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
-      {
-        dockspace_flags ^= ImGuiDockNodeFlags_NoSplit;
-      }
-      if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0))
-      {
-        dockspace_flags ^= ImGuiDockNodeFlags_NoResize;
-      }
-      if (ImGui::MenuItem(
-              "Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))
-      {
-        dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode;
-      }
-      if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))
-      {
-        dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar;
-      }
-      if (ImGui::MenuItem("Flag: PassthruCentralNode",
-                          "",
-                          (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0,
-                          opt_fullscreen))
-      {
-        dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode;
-      }
-      ImGui::Separator();
+  //       if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
+  //       {
+  //         dockspace_flags ^= ImGuiDockNodeFlags_NoSplit;
+  //       }
+  //       if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0))
+  //       {
+  //         dockspace_flags ^= ImGuiDockNodeFlags_NoResize;
+  //       }
+  //       if (ImGui::MenuItem(
+  //               "Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) !=
+  //               0))
+  //       {
+  //         dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode;
+  //       }
+  //       if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))
+  //       {
+  //         dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar;
+  //       }
+  //       if (ImGui::MenuItem("Flag: PassthruCentralNode",
+  //                           "",
+  //                           (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0,
+  //                           opt_fullscreen))
+  //       {
+  //         dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode;
+  //       }
+  //       ImGui::Separator();
 
-    //   if (ImGui::MenuItem("Close", NULL, false, p_open != NULL)) *p_open = false;
-    //   ImGui::EndMenu();
-    }
-    // HelpMarker("When docking is enabled, you can ALWAYS dock MOST window into another! Try it now!"
-    //            "\n"
-    //            "- Drag from window title bar or their tab to dock/undock."
-    //            "\n"
-    //            "- Drag from window menu button (upper-left button) to undock an entire node (all windows)."
-    //            "\n"
-    //            "- Hold SHIFT to disable docking."
-    //            "\n"
-    //            "This demo app has nothing to do with it!"
-    //            "\n\n"
-    //            "This demo app only demonstrate the use of ImGui::DockSpace() which allows you to manually create a "
-    //            "docking node _within_ another window."
-    //            "\n\n"
-    //            "Read comments in ShowExampleAppDockSpace() for more details.");
+  //       //   if (ImGui::MenuItem("Close", NULL, false, p_open != NULL)) *p_open = false;
+  //       //   ImGui::EndMenu();
+  //     }
+  //     // HelpMarker("When docking is enabled, you can ALWAYS dock MOST window into another! Try it now!"
+  //     //            "\n"
+  //     //            "- Drag from window title bar or their tab to dock/undock."
+  //     //            "\n"
+  //     //            "- Drag from window menu button (upper-left button) to undock an entire node (all windows)."
+  //     //            "\n"
+  //     //            "- Hold SHIFT to disable docking."
+  //     //            "\n"
+  //     //            "This demo app has nothing to do with it!"
+  //     //            "\n\n"
+  //     //            "This demo app only demonstrate the use of ImGui::DockSpace() which allows you to manually create
+  //     a "
+  //     //            "docking node _within_ another window."
+  //     //            "\n\n"
+  //     //            "Read comments in ShowExampleAppDockSpace() for more details.");
 
-    ImGui::EndMenuBar();
-  }
+  //     ImGui::EndMenuBar();
+  //   }
 
   ImGui::End();
 }
@@ -334,19 +339,30 @@ CXChildVisitResult visitor(CXCursor cursor, CXCursor /* parent */, CXClientData 
   const char *a = clang_getCString(clang_getCursorKindSpelling(cursorKind));
   const char *b = clang_getCString(clang_getCursorSpelling(cursor));
 
-  std::string show_string = std::string(curLevel, '-') + a + b;
+  std::string c = clang_getCString(clang_getTypeSpelling(clang_getCursorType(cursor)));
 
-  ImGui::SetNextItemOpen(true);
-  if (ImGui::TreeNode(show_string.c_str())) {}
+  std::string show_string
+      = "|" + std::string(curLevel, '-') + std::string(a) + "  " + std::string(c) + " <" + std::string(b) + ">";
+
+  ImGui::Button(show_string.c_str());
+
+  //   ImGui::Text(show_string.c_str());
+  //   ImGui::SetNextItemOpen(true);
+  //   if (ImGui::TreeNode(show_string.c_str()))
+  //   {
+  //     if (ImGui::IsItemClicked()) {}
+
+  //     ImGui::Text(show_string1.c_str());
+  //   }
   clang_visitChildren(cursor, visitor, &nextLevel);
+  // ImGui::TreePop();
 
-  ImGui::TreePop();
   return CXChildVisit_Continue;
 }
 
 int main(int, char **)
 {
-    // std::cout<<std::endl;
+  // std::cout<<std::endl;
 
   CXIndex           idx       = clang_createIndex(1, 1);
   CXTranslationUnit tu        = clang_createTranslationUnitFromSourceFile(idx, "002sample.cpp", 0, 0, 0, 0);
@@ -467,6 +483,13 @@ int main(int, char **)
   bool   show_another_window = false;
   ImVec4 clear_color         = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+  // TEXT EDITOR SAMPLE
+  TextEditor editor;
+  auto       lang = TextEditor::LanguageDefinition::CPlusPlus();
+  editor.SetLanguageDefinition(lang);
+
+  static const char *fileToEdit = "test.cpp";
+
   // Main loop
   while (!glfwWindowShouldClose(window))
   {
@@ -484,89 +507,148 @@ int main(int, char **)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-SetDockSpace();
+    SetDockSpace();
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code
     // to learn more about Dear ImGui!).
-    if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
+    // if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
+
+    {
+      auto cpos = editor.GetCursorPosition();
+      //   ImGui::Begin("Text Editor Demo", nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar);
+      ImGui::Begin("Text Editor", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove);
+      ImGui::SetWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+      if (ImGui::BeginMenuBar())
+      {
+        if (ImGui::BeginMenu("File"))
+        {
+          if (ImGui::MenuItem("Save"))
+          {
+            auto textToSave = editor.GetText();
+            /// save text....
+          }
+          if (ImGui::MenuItem("Quit", "Alt-F4")) break;
+          ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Edit"))
+        {
+          bool ro = editor.IsReadOnly();
+          if (ImGui::MenuItem("Read-only mode", nullptr, &ro)) editor.SetReadOnly(ro);
+          ImGui::Separator();
+
+          if (ImGui::MenuItem("Undo", "ALT-Backspace", nullptr, !ro && editor.CanUndo())) editor.Undo();
+          if (ImGui::MenuItem("Redo", "Ctrl-Y", nullptr, !ro && editor.CanRedo())) editor.Redo();
+
+          ImGui::Separator();
+
+          if (ImGui::MenuItem("Copy", "Ctrl-C", nullptr, editor.HasSelection())) editor.Copy();
+          if (ImGui::MenuItem("Cut", "Ctrl-X", nullptr, !ro && editor.HasSelection())) editor.Cut();
+          if (ImGui::MenuItem("Delete", "Del", nullptr, !ro && editor.HasSelection())) editor.Delete();
+          if (ImGui::MenuItem("Paste", "Ctrl-V", nullptr, !ro && ImGui::GetClipboardText() != nullptr)) editor.Paste();
+
+          ImGui::Separator();
+
+          if (ImGui::MenuItem("Select all", nullptr, nullptr))
+            editor.SetSelection(TextEditor::Coordinates(), TextEditor::Coordinates(editor.GetTotalLines(), 0));
+
+          ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("View"))
+        {
+          if (ImGui::MenuItem("Dark palette")) editor.SetPalette(TextEditor::GetDarkPalette());
+          if (ImGui::MenuItem("Light palette")) editor.SetPalette(TextEditor::GetLightPalette());
+          if (ImGui::MenuItem("Retro blue palette")) editor.SetPalette(TextEditor::GetRetroBluePalette());
+          ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+      }
+
+      ImGui::Text("%6d/%-6d %6d lines  | %s | %s | %s | %s",
+                  cpos.mLine + 1,
+                  cpos.mColumn + 1,
+                  editor.GetTotalLines(),
+                  editor.IsOverwrite() ? "Ovr" : "Ins",
+                  editor.CanUndo() ? "*" : " ",
+                  editor.GetLanguageDefinition().mName.c_str(),
+                  fileToEdit);
+
+      editor.Render("TextEditor");
+      ImGui::End();
+    }
 
     {
 
-      ImGui::Begin("AST View");
+      ImGui::Begin("AST View", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove);
 
       clang_visitChildren(root, visitor, &treeLevel);
 
       //  ImGui::SetNextItemOpen(true);
-      //   if (ImGui::TreeNode("Trees"))
-      //     {
-      //         // DEMO_MARKER("Widgets/Trees/Basic trees");
-      //         if (ImGui::TreeNode("Basic trees"))
-      //         {
-      //             for (int i = 0; i < 5; i++)
-      //             {
-      //                 // Use SetNextItemOpen() so set the default state of a node to be open. We could
-      //                 // also use TreeNodeEx() with the ImGuiTreeNodeFlags_DefaultOpen flag to achieve the same
-      //                 thing! if (i == 0)
-      //                     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+      if (ImGui::TreeNode("Basic trees"))
+      {
+        for (int i = 0; i < 5; i++)
+        {
+          // Use SetNextItemOpen() so set the default state of a node to be open. We could
+          // also use TreeNodeEx() with the ImGuiTreeNodeFlags_DefaultOpen flag to achieve the same thing!
+          if (i == 0) ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
-      //                 if (ImGui::TreeNode((void*)(intptr_t)i, "Child %d", i))
-      //                 {
-      //                     ImGui::Text("blah blah");
-      //                     ImGui::SameLine();
-      //                     if (ImGui::SmallButton("button")) {}
-      //                     ImGui::TreePop();
-      //                 }
-      //             }
-      //             ImGui::TreePop();
-      //         }
-      //             ImGui::TreePop();
-      //     }
-      // ImGui::TreePop();
+          if (ImGui::TreeNode((void *) (intptr_t) i, "Child %d", i))
+          {
+            ImGui::Text("blah blah");
+            ImGui::SameLine();
+            if (ImGui::SmallButton("button")) {}
+            ImGui::TreePop();
+          }
+        }
+        ImGui::TreePop();
+      }
 
       ImGui::End();
     }
     // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-    {
-      static float f       = 0.0f;
-      static int   counter = 0;
+    // {
+    //   static float f       = 0.0f;
+    //   static int   counter = 0;
 
-      ImGui::Begin("Hello, 中文测试world!"); // Create a window called "Hello, world!" and append into it.
+    //   ImGui::Begin("Hello, 中文测试world!"); // Create a window called "Hello, world!" and append into it.
 
-      //  ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Yellow");
-      //   beginTextColor();
-      ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4) ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
-      ImGui::Button(IM_ICON_WINDOW_CLOSE);
-      ImGui::PopStyleColor();
-      //   endTextColor();
-      ImGui::Button(IM_ICON_SEARCH " Search");
-      ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
-      ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-      ImGui::Checkbox("Another Window", &show_another_window);
+    //   //  ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Yellow");
+    //   //   beginTextColor();
+    //   ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4) ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
+    //   ImGui::Button(IM_ICON_WINDOW_CLOSE);
+    //   ImGui::PopStyleColor();
+    //   //   endTextColor();
+    //   ImGui::Button(IM_ICON_SEARCH " Search");
+    //   ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
+    //   ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
+    //   ImGui::Checkbox("Another Window", &show_another_window);
 
-      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);              // Edit 1 float using a slider from 0.0f to 1.0f
-      ImGui::ColorEdit3("clear color", (float *) &clear_color); // Edit 3 floats representing a color
+    //   ImGui::SliderFloat("float", &f, 0.0f, 1.0f);              // Edit 1 float using a slider from 0.0f to 1.0f
+    //   ImGui::ColorEdit3("clear color", (float *) &clear_color); // Edit 3 floats representing a color
 
-      if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-        counter++;
-      ImGui::SameLine();
-      ImGui::Text("counter = %d", counter);
+    //   if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when
+    //   edited/activated)
+    //     counter++;
+    //   ImGui::SameLine();
+    //   ImGui::Text("counter = %d", counter);
 
-      ImGui::Text(
-          "Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    //   ImGui::Text(
+    //       "Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+    //       ImGui::GetIO().Framerate);
 
-      ImGui::Button("Hello, 中文测试 world!");
-      ImGui::End();
-    }
+    //   ImGui::Button("Hello, 中文测试 world!");
+    //   ImGui::End();
+    // }
 
-    // 3. Show another simple window.
-    if (show_another_window)
-    {
-      ImGui::Begin("Another Window",
-                   &show_another_window); // Pass a pointer to our bool variable (the window will have a closing
-                                          // button that will clear the bool when clicked)
-      ImGui::Text("Hello from another window!");
-      if (ImGui::Button("Close Me")) show_another_window = false;
-      ImGui::End();
-    }
+    // // 3. Show another simple window.
+    // if (show_another_window)
+    // {
+    //   ImGui::Begin("Another Window",
+    //                &show_another_window); // Pass a pointer to our bool variable (the window will have a closing
+    //                                       // button that will clear the bool when clicked)
+    //   ImGui::Text("Hello from another window!");
+    //   if (ImGui::Button("Close Me")) show_another_window = false;
+    //   ImGui::End();
+    // }
 
     // Rendering
     ImGui::Render();
