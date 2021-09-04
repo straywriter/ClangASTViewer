@@ -320,6 +320,28 @@ void SetDockSpace()
 #include <stdlib.h>
 #include <string>
 
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/Path.h"
+
+void WriteFile(std::string &Filename, const std::string &Contents, std::string Dir = "");
+void WriteFile(std::string &Filename, const std::string &Contents, std::string Dir)
+{
+
+  //   if (!llvm::sys::path::is_absolute(Filename))
+  //   {
+  //     llvm::SmallString<256> Path(Dir);
+  //     llvm::sys::path::append(Path, Filename);
+  //     Filename = std::string(Path.str());
+  //     // Files.insert(Filename);
+  //   }
+  //   llvm::sys::fs::create_directories(llvm::sys::path::parent_path(Filename));
+  std::ofstream OS(Filename);
+  OS << Contents;
+  assert(OS.good());
+  OS.close();
+}
+
 CXChildVisitResult visitor(CXCursor cursor, CXCursor /* parent */, CXClientData clientData)
 {
   CXSourceLocation location = clang_getCursorLocation(cursor);
@@ -362,12 +384,23 @@ CXChildVisitResult visitor(CXCursor cursor, CXCursor /* parent */, CXClientData 
 
 int main(int, char **)
 {
+  // std::string abc="asdflkjalsdkfjl";
+  // std::string name="aa.txt";
+  // WriteFile(name,abc);
+  // WriteFile(name,std::string("bsadflkjaf"));
   // std::cout<<std::endl;
 
-  CXIndex           idx       = clang_createIndex(1, 1);
-  CXTranslationUnit tu        = clang_createTranslationUnitFromSourceFile(idx, "002sample.cpp", 0, 0, 0, 0);
-  unsigned int      treeLevel = 0;
-  auto              root      = clang_getTranslationUnitCursor(tu);
+  //   std::string init_code = "#include <iostream> using namespace std; int main() {  cout <<"+ std::string(" Hello,
+  //   World!") + ";  return 0;}";
+  std::string temp_file_name = "temp.cpp";
+
+  // WriteFile(temp_file_name,init_code);
+  CXIndex           idx = clang_createIndex(1, 1);
+  CXTranslationUnit tu;
+  bool              clang_unit_init = false;
+  //   CXTranslationUnit tu = clang_createTranslationUnitFromSourceFile(idx, "helloworld.cpp", 0, 0, 0, 0);
+  //   unsigned int      treeLevel = 0;
+  //   auto              root      = clang_getTranslationUnitCursor(tu);
 
   // Setup window
   glfwSetErrorCallback(glfw_error_callback);
@@ -488,7 +521,7 @@ int main(int, char **)
   auto       lang = TextEditor::LanguageDefinition::CPlusPlus();
   editor.SetLanguageDefinition(lang);
 
-  static const char *fileToEdit = "test.cpp";
+  static const char *fileToEdit = "temp.cpp";
 
   // Main loop
   while (!glfwWindowShouldClose(window))
@@ -521,9 +554,28 @@ int main(int, char **)
       {
         if (ImGui::BeginMenu("File"))
         {
-          if (ImGui::MenuItem("Save"))
+          auto f = [&]
           {
-            auto textToSave = editor.GetText();
+            std::string textToSave = editor.GetText();
+            // WriteFile(std::string("temp.cpp"),textToSave);
+            std::ofstream myfile;
+            myfile.open(temp_file_name);
+            myfile << textToSave;
+            myfile.close();
+            tu              = clang_createTranslationUnitFromSourceFile(idx, "temp.cpp", 0, 0, 0, 0);
+            clang_unit_init = true;
+            return true;
+          };
+          if (ImGui::MenuItem("Save", "Ctrl+S"))
+          {
+            f();
+            // std::string textToSave = editor.GetText();
+            // // WriteFile(std::string("temp.cpp"),textToSave);
+            // std::ofstream myfile;
+            // myfile.open(temp_file_name);
+            // myfile << textToSave;
+            // myfile.close();
+            // tu = clang_createTranslationUnitFromSourceFile(idx, "temp.cpp", 0, 0, 0, 0);
             /// save text....
           }
           if (ImGui::MenuItem("Quit", "Alt-F4")) break;
@@ -580,26 +632,11 @@ int main(int, char **)
 
       ImGui::Begin("AST View", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove);
 
-      clang_visitChildren(root, visitor, &treeLevel);
-
-      //  ImGui::SetNextItemOpen(true);
-      if (ImGui::TreeNode("Basic trees"))
+      unsigned int treeLevel = 0;
+      if (clang_unit_init)
       {
-        for (int i = 0; i < 5; i++)
-        {
-          // Use SetNextItemOpen() so set the default state of a node to be open. We could
-          // also use TreeNodeEx() with the ImGuiTreeNodeFlags_DefaultOpen flag to achieve the same thing!
-          if (i == 0) ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-
-          if (ImGui::TreeNode((void *) (intptr_t) i, "Child %d", i))
-          {
-            ImGui::Text("blah blah");
-            ImGui::SameLine();
-            if (ImGui::SmallButton("button")) {}
-            ImGui::TreePop();
-          }
-        }
-        ImGui::TreePop();
+        clang_visitChildren(clang_getTranslationUnitCursor(tu), visitor, &treeLevel);
+        clang_unit_init = true;
       }
 
       ImGui::End();
@@ -625,9 +662,9 @@ int main(int, char **)
     //   ImGui::SliderFloat("float", &f, 0.0f, 1.0f);              // Edit 1 float using a slider from 0.0f to 1.0f
     //   ImGui::ColorEdit3("clear color", (float *) &clear_color); // Edit 3 floats representing a color
 
-    //   if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when
-    //   edited/activated)
-    //     counter++;
+    // //   if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when
+    // //   edited/activated)
+    // //     counter++;
     //   ImGui::SameLine();
     //   ImGui::Text("counter = %d", counter);
 
