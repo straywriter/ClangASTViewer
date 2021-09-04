@@ -204,37 +204,13 @@ void SetDockSpace()
     ImGui::DockBuilderSetNodeSize(DockspaceID, ImGui::GetIO().DisplaySize * ImGui::GetIO().DisplayFramebufferScale);
 
     ImGuiID dock_main_id = DockspaceID;
-    // ImGuiID DockBottom   = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.3f, nullptr, &dock_main_id);
     ImGuiID DockLeft  = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.5f, nullptr, &dock_main_id);
     ImGuiID DockRight = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
 
-    // ImGuiID DockLeftChild = ImGui::DockBuilderSplitNode(DockLeft, ImGuiDir_Down, 0.875f, nullptr, &DockLeft);
-    // ImGuiID DockRightChild = ImGui::DockBuilderSplitNode(DockRight, ImGuiDir_Down, 0.875f, nullptr, &DockRight);
-    // ImGuiID DockingLeftDownChild
-    //     = ImGui::DockBuilderSplitNode(DockLeftChild, ImGuiDir_Down, 0.06f, nullptr, &DockLeftChild);
-    // ImGuiID DockingRightDownChild
-    //     = ImGui::DockBuilderSplitNode(DockRightChild, ImGuiDir_Down, 0.06f, nullptr, &DockRightChild);
-
-    // ImGuiID DockBottomChild        = ImGui::DockBuilderSplitNode(DockBottom, ImGuiDir_Down, 0.2f, nullptr,
-    // &DockBottom);
-    // ImGuiID DockingBottomLeftChild = ImGui::DockBuilderSplitNode(DockLeft, ImGuiDir_Down, 0.4f, nullptr, &DockLeft);
-    //  ImGuiID DockingBottomRightChild = ImGui::DockBuilderSplitNode(DockRight, ImGuiDir_Down,
-    // 0.4f, nullptr, &DockRight);
-
-    // ImGuiID DockMiddle       = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.8f, nullptr,
-    // &dock_main_id); ImGuiID DockBottomMiddle = ImGui::DockBuilderSplitNode(DockMiddle, ImGuiDir_Down, 0.3f, nullptr,
-    // &DockMiddle);
-
-    // ImGui::DockBuilderDockWindow("###scene", DockMiddle);
     ImGui::DockBuilderDockWindow("AST View", DockRight);
-    // ImGui::DockBuilderDockWindow("Hello, 中文测试world!", DockBottomMiddle);
-    // ImGui::DockBuilderDockWindow("Hello, 中文测试world!", DockingBottomLeftChild);
-    // ImGui::DockBuilderDockWindow("AST View", DockingBottomLeftChild);
+;
     ImGui::DockBuilderDockWindow("Text Editor", DockLeft);
-    // ImGui::DockBuilderDockWindow("GraphicsInfo", DockLeft);
-    // ImGui::DockBuilderDockWindow("ApplicationInfo", DockLeft);
-    // ImGui::DockBuilderDockWindow("###hierarchy", DockLeft);
-    // ImGui::DockBuilderDockWindow("###textEdit", DockMiddle);
+
 
     ImGui::DockBuilderFinish(DockspaceID);
   }
@@ -246,70 +222,6 @@ void SetDockSpace()
     // ImGuiID dockspace_id = ImGui::GetID("MyDockSpace1");
     ImGui::DockSpace(DockspaceID, ImVec2(0.0f, 0.0f), dockspace_flags);
   }
-  else
-  {
-    // ShowDockingDisabledMessage();
-  }
-
-  //   if (ImGui::BeginMenuBar())
-  //   {
-  //     if (ImGui::BeginMenu("Options"))
-  //     {
-  //       // Disabling fullscreen would allow the window to be moved to the front of other windows,
-  //       // which we can't undo at the moment without finer window depth/z control.
-  //       ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen);
-  //       ImGui::MenuItem("Padding", NULL, &opt_padding);
-  //       ImGui::Separator();
-
-  //       if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
-  //       {
-  //         dockspace_flags ^= ImGuiDockNodeFlags_NoSplit;
-  //       }
-  //       if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0))
-  //       {
-  //         dockspace_flags ^= ImGuiDockNodeFlags_NoResize;
-  //       }
-  //       if (ImGui::MenuItem(
-  //               "Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) !=
-  //               0))
-  //       {
-  //         dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode;
-  //       }
-  //       if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))
-  //       {
-  //         dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar;
-  //       }
-  //       if (ImGui::MenuItem("Flag: PassthruCentralNode",
-  //                           "",
-  //                           (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0,
-  //                           opt_fullscreen))
-  //       {
-  //         dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode;
-  //       }
-  //       ImGui::Separator();
-
-  //       //   if (ImGui::MenuItem("Close", NULL, false, p_open != NULL)) *p_open = false;
-  //       //   ImGui::EndMenu();
-  //     }
-  //     // HelpMarker("When docking is enabled, you can ALWAYS dock MOST window into another! Try it now!"
-  //     //            "\n"
-  //     //            "- Drag from window title bar or their tab to dock/undock."
-  //     //            "\n"
-  //     //            "- Drag from window menu button (upper-left button) to undock an entire node (all windows)."
-  //     //            "\n"
-  //     //            "- Hold SHIFT to disable docking."
-  //     //            "\n"
-  //     //            "This demo app has nothing to do with it!"
-  //     //            "\n\n"
-  //     //            "This demo app only demonstrate the use of ImGui::DockSpace() which allows you to manually create
-  //     a "
-  //     //            "docking node _within_ another window."
-  //     //            "\n\n"
-  //     //            "Read comments in ShowExampleAppDockSpace() for more details.");
-
-  //     ImGui::EndMenuBar();
-  //   }
-
   ImGui::End();
 }
 
@@ -320,27 +232,7 @@ void SetDockSpace()
 #include <stdlib.h>
 #include <string>
 
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
-
-void WriteFile(std::string &Filename, const std::string &Contents, std::string Dir = "");
-void WriteFile(std::string &Filename, const std::string &Contents, std::string Dir)
-{
-
-  //   if (!llvm::sys::path::is_absolute(Filename))
-  //   {
-  //     llvm::SmallString<256> Path(Dir);
-  //     llvm::sys::path::append(Path, Filename);
-  //     Filename = std::string(Path.str());
-  //     // Files.insert(Filename);
-  //   }
-  //   llvm::sys::fs::create_directories(llvm::sys::path::parent_path(Filename));
-  std::ofstream OS(Filename);
-  OS << Contents;
-  assert(OS.good());
-  OS.close();
-}
+TextEditor editor;
 
 CXChildVisitResult visitor(CXCursor cursor, CXCursor /* parent */, CXClientData clientData)
 {
@@ -349,58 +241,39 @@ CXChildVisitResult visitor(CXCursor cursor, CXCursor /* parent */, CXClientData 
 
   CXCursorKind cursorKind = clang_getCursorKind(cursor);
 
-  //   if (cursorKind == CXCursor_FunctionDecl || cursorKind == CXCursor_FunctionTemplate)
-  //     gftest.list.push_back(Function(Cursor(cursor)));
-
-  //   if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_ClassTemplate) { mycursor = cursor; }
-
-  //   if (cursorKind == CXCursor_EnumDecl) { myenum = cursor; }
   unsigned int curLevel  = *(reinterpret_cast<unsigned int *>(clientData));
   unsigned int nextLevel = curLevel + 1;
 
   const char *a = clang_getCString(clang_getCursorKindSpelling(cursorKind));
   const char *b = clang_getCString(clang_getCursorSpelling(cursor));
-
   std::string c = clang_getCString(clang_getTypeSpelling(clang_getCursorType(cursor)));
 
   std::string show_string
       = "|" + std::string(curLevel, '-') + std::string(a) + "  " + std::string(c) + " <" + std::string(b) + ">";
 
-  ImGui::Button(show_string.c_str());
 
-  //   ImGui::Text(show_string.c_str());
-  //   ImGui::SetNextItemOpen(true);
-  //   if (ImGui::TreeNode(show_string.c_str()))
-  //   {
-  //     if (ImGui::IsItemClicked()) {}
+  CXFile   file;
+  unsigned line;
+  unsigned column;
+  unsigned offset;
 
-  //     ImGui::Text(show_string1.c_str());
-  //   }
+  clang_getFileLocation(location, &file, &line, &column, &offset);
+
+  if (ImGui::Button(show_string.c_str())) editor.SetCursorPosition({int(line-1), int(column-1)});
   clang_visitChildren(cursor, visitor, &nextLevel);
-  // ImGui::TreePop();
 
   return CXChildVisit_Continue;
 }
 
 int main(int, char **)
 {
-  // std::string abc="asdflkjalsdkfjl";
-  // std::string name="aa.txt";
-  // WriteFile(name,abc);
-  // WriteFile(name,std::string("bsadflkjaf"));
-  // std::cout<<std::endl;
 
-  //   std::string init_code = "#include <iostream> using namespace std; int main() {  cout <<"+ std::string(" Hello,
-  //   World!") + ";  return 0;}";
   std::string temp_file_name = "temp.cpp";
 
   // WriteFile(temp_file_name,init_code);
   CXIndex           idx = clang_createIndex(1, 1);
   CXTranslationUnit tu;
   bool              clang_unit_init = false;
-  //   CXTranslationUnit tu = clang_createTranslationUnitFromSourceFile(idx, "helloworld.cpp", 0, 0, 0, 0);
-  //   unsigned int      treeLevel = 0;
-  //   auto              root      = clang_getTranslationUnitCursor(tu);
 
   // Setup window
   glfwSetErrorCallback(glfw_error_callback);
@@ -430,7 +303,7 @@ int main(int, char **)
 #endif
 
   // Create window with graphics context
-  GLFWwindow *window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(1280, 720, "Clang AST Viewer", NULL, NULL);
   if (window == NULL) return 1;
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1); // Enable vsync
@@ -470,38 +343,12 @@ int main(int, char **)
   // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
   io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-  // io.ConfigViewportsNoAutoMerge = true;
-  // io.ConfigViewportsNoTaskBarIcon = true;
 
-  // Setup Dear ImGui style
-  // ImGui::StyleColorsDark();
   myApplyDefaultStyle();
-  // ImGui::StyleColorsClassic();
-
-  // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular
-  // ones.
-  // ImGuiStyle &style = ImGui::GetStyle();
-  // if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-  // {
-  //     style.WindowRounding = 0.0f;
-  //     style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-  // }
 
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
-
-  // Load Fonts
-  // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use
-  // ImGui::PushFont()/PopFont() to select them.
-  // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-  // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application
-  // (e.g. use an assertion, or display an error and quit).
-  // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling
-  // ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-  // - Read 'docs/FONTS.md' for more instructions and details.
-  // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double
-  // backslash \\ !
 
   io.Fonts->AddFontFromFileTTF(
       "Font/Consolas-with-Yahei Nerd Font.ttf", 26.0f, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
@@ -512,13 +359,11 @@ int main(int, char **)
   io.Fonts->AddFontFromFileTTF("Font/fontawesome-webfont.ttf", 20.0f, &config, icon_ranges);
 
   // Our state
-  bool   show_demo_window    = true;
-  bool   show_another_window = false;
-  ImVec4 clear_color         = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
   // TEXT EDITOR SAMPLE
-  TextEditor editor;
-  auto       lang = TextEditor::LanguageDefinition::CPlusPlus();
+
+  auto lang = TextEditor::LanguageDefinition::CPlusPlus();
   editor.SetLanguageDefinition(lang);
 
   static const char *fileToEdit = "temp.cpp";
@@ -541,9 +386,6 @@ int main(int, char **)
     ImGui::NewFrame();
 
     SetDockSpace();
-    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code
-    // to learn more about Dear ImGui!).
-    // if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
 
     {
       auto cpos = editor.GetCursorPosition();
@@ -564,20 +406,10 @@ int main(int, char **)
             myfile.close();
             tu              = clang_createTranslationUnitFromSourceFile(idx, "temp.cpp", 0, 0, 0, 0);
             clang_unit_init = true;
+            // editor.SetCursorPosition({1,1});
             return true;
           };
-          if (ImGui::MenuItem("Save", "Ctrl+S"))
-          {
-            f();
-            // std::string textToSave = editor.GetText();
-            // // WriteFile(std::string("temp.cpp"),textToSave);
-            // std::ofstream myfile;
-            // myfile.open(temp_file_name);
-            // myfile << textToSave;
-            // myfile.close();
-            // tu = clang_createTranslationUnitFromSourceFile(idx, "temp.cpp", 0, 0, 0, 0);
-            /// save text....
-          }
+          if (ImGui::MenuItem("Save", "Ctrl+S")) { f(); }
           if (ImGui::MenuItem("Quit", "Alt-F4")) break;
           ImGui::EndMenu();
         }
@@ -641,51 +473,6 @@ int main(int, char **)
 
       ImGui::End();
     }
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-    // {
-    //   static float f       = 0.0f;
-    //   static int   counter = 0;
-
-    //   ImGui::Begin("Hello, 中文测试world!"); // Create a window called "Hello, world!" and append into it.
-
-    //   //  ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Yellow");
-    //   //   beginTextColor();
-    //   ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4) ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
-    //   ImGui::Button(IM_ICON_WINDOW_CLOSE);
-    //   ImGui::PopStyleColor();
-    //   //   endTextColor();
-    //   ImGui::Button(IM_ICON_SEARCH " Search");
-    //   ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
-    //   ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-    //   ImGui::Checkbox("Another Window", &show_another_window);
-
-    //   ImGui::SliderFloat("float", &f, 0.0f, 1.0f);              // Edit 1 float using a slider from 0.0f to 1.0f
-    //   ImGui::ColorEdit3("clear color", (float *) &clear_color); // Edit 3 floats representing a color
-
-    // //   if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when
-    // //   edited/activated)
-    // //     counter++;
-    //   ImGui::SameLine();
-    //   ImGui::Text("counter = %d", counter);
-
-    //   ImGui::Text(
-    //       "Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-    //       ImGui::GetIO().Framerate);
-
-    //   ImGui::Button("Hello, 中文测试 world!");
-    //   ImGui::End();
-    // }
-
-    // // 3. Show another simple window.
-    // if (show_another_window)
-    // {
-    //   ImGui::Begin("Another Window",
-    //                &show_another_window); // Pass a pointer to our bool variable (the window will have a closing
-    //                                       // button that will clear the bool when clicked)
-    //   ImGui::Text("Hello from another window!");
-    //   if (ImGui::Button("Close Me")) show_another_window = false;
-    //   ImGui::End();
-    // }
 
     // Rendering
     ImGui::Render();
